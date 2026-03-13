@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo, useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { CookieBanner } from "@/components/cookie-banner";
@@ -24,8 +25,16 @@ interface ClientLayoutProps {
  *  - `useEffect` para leitura do localStorage sem hidratação mismatch.
  */
 export function ClientLayout({ children }: ClientLayoutProps) {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const normalizedPathname =
+    pathname !== "/" ? pathname.replace(/\/+$/, "") : "/";
+  const isWorkspaceRoute =
+    normalizedPathname === "/" || normalizedPathname.startsWith("/preferences");
+  const isLoginRoute = normalizedPathname === "/login";
+  const isImmersiveRoute = isWorkspaceRoute || isLoginRoute;
+  const locksDocumentScroll = isImmersiveRoute;
 
   // Evita mismatch de hidratação entre servidor e cliente
   useEffect(() => {
@@ -44,6 +53,23 @@ export function ClientLayout({ children }: ClientLayoutProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  useEffect(() => {
+    if (!locksDocumentScroll) {
+      return;
+    }
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [locksDocumentScroll]);
+
   // Estilos condicionais do indicador de progresso (CSS Conditional Rule equivalente em JS)
   const indicatorStyle = useMemo<React.CSSProperties>(
     () => ({
@@ -55,37 +81,51 @@ export function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <>
-      {/* Indicador de progresso de leitura acessível */}
-      <div
-        role="progressbar"
-        aria-valuenow={scrollProgress}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label="Progresso de leitura da página"
-        className="fixed top-0 left-0 h-1 bg-primary z-[60]"
-        style={indicatorStyle}
-      />
+      {!isImmersiveRoute && (
+        <>
+          {/* Indicador de progresso de leitura acessível */}
+          <div
+            role="progressbar"
+            aria-valuenow={scrollProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso de leitura da página"
+            className="fixed top-0 left-0 h-1 bg-primary z-[60]"
+            style={indicatorStyle}
+          />
 
-      {/* Barra de navegação sticky */}
-      <Navbar />
+          {/* Barra de navegação sticky */}
+          <Navbar />
+        </>
+      )}
 
       {/* Conteúdo principal da página */}
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex-1 focus:outline-none"
+        className={
+          isImmersiveRoute
+            ? `h-[100dvh] overflow-hidden focus:outline-none${
+                isLoginRoute ? " bg-[#041017]" : ""
+              }`
+            : "flex-1 focus:outline-none"
+        }
       >
         {children}
       </main>
 
-      {/* Rodapé */}
-      <Footer />
+      {!isImmersiveRoute && (
+        <>
+          {/* Rodapé */}
+          <Footer />
+
+          {/* Componente original de scroll (mantido por compatibilidade) */}
+          <ScrollIndicator />
+        </>
+      )}
 
       {/* Banner de cookies — renderizado apenas após montagem para evitar SSR mismatch */}
       {mounted && <CookieBanner />}
-
-      {/* Componente original de scroll (mantido por compatibilidade) */}
-      <ScrollIndicator />
     </>
   );
 }

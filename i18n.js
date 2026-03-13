@@ -4,7 +4,7 @@ const { i18n } = require("next-i18next");
 const config = {
   i18n: {
     defaultLocale: "pt-PT",
-    locales: ["pt-PT", "pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT"],
+    locales: ["pt-PT", "en-US", "es-ES"],
   },
   defaultNS: "common",
   localePath: "./locales",
