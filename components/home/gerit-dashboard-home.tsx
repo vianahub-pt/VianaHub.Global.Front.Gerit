@@ -15,6 +15,7 @@ import {
 } from "@/components/translation-context";
 import { useDashboardShell } from "@/hooks/use-dashboard-shell";
 import { WorkspaceShell } from "@/components/workspace/workspace-shell";
+import { useTranslation } from "@/components/translation-context";
 
 const viewTabs = ["month", "week", "day"] as const;
 const calendarStartMinutes = 0;

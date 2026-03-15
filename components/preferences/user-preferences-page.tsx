@@ -24,22 +24,172 @@ import {
   useUserPreferences,
 } from "@/hooks/use-user-preferences";
 
-const TIMEZONE_OPTIONS = [
+export const TIMEZONE_OPTIONS = [
+  { value: "Africa/Abuja", label: "(UTC +01:00) Africa/Abuja" },
+  { value: "Africa/Cairo", label: "(UTC +02:00) Africa/Cairo" },
+  { value: "Africa/Johannesburg", label: "(UTC +02:00) Africa/Johannesburg" },
+  { value: "Africa/Lagos", label: "(UTC +01:00) Africa/Lagos" },
+  { value: "Africa/Luanda", label: "(UTC +01:00) Africa/Luanda" },
+  { value: "America/Argentina/Buenos_Aires", label: "(UTC -03:00) America/Buenos_Aires" },
+  { value: "America/Mexico_City", label: "(UTC -06:00) America/Mexico_City" },
+  { value: "America/New_York", label: "(UTC -05:00) America/Washington" },
+  { value: "America/Sao_Paulo", label: "(UTC -03:00) America/Sao_Paulo" },
+  { value: "Asia/Bangkok", label: "(UTC +07:00) Asia/Bangkok" },
+  { value: "Asia/Beijing", label: "(UTC +08:00) Asia/Beijing" },
+  { value: "Asia/Delhi", label: "(UTC +05:30) Asia/Delhi" },
+  { value: "Asia/Jakarta", label: "(UTC +07:00) Asia/Jakarta" },
+  { value: "Asia/Seoul", label: "(UTC +09:00) Asia/Seoul" },
+  { value: "Asia/Tokyo", label: "(UTC +09:00) Asia/Tokyo" },
+  { value: "Australia/Sydney", label: "(UTC +10:00) Australia/Sydney" },
+  { value: "Europe/Amsterdam", label: "(UTC +01:00) Europe/Amsterdam" },
+  { value: "Europe/Berlin", label: "(UTC +01:00) Europe/Berlin" },
+  { value: "Europe/Brussels", label: "(UTC +01:00) Europe/Brussels" },
+  { value: "Europe/Bucharest", label: "(UTC +02:00) Europe/Bucharest" },
   { value: "Europe/Lisbon", label: "(UTC +00:00) Europe/Lisbon" },
   { value: "Europe/London", label: "(UTC +00:00) Europe/London" },
-  { value: "Africa/Luanda", label: "(UTC +01:00) Africa/Luanda" },
-  { value: "America/Sao_Paulo", label: "(UTC -03:00) America/Sao_Paulo" },
+  { value: "Europe/Madrid", label: "(UTC +01:00) Europe/Madrid" },
+  { value: "Europe/Moscow", label: "(UTC +03:00) Europe/Moscow" },
+  { value: "Europe/Paris", label: "(UTC +01:00) Europe/Paris" },
+  { value: "Europe/Prague", label: "(UTC +01:00) Europe/Prague" },
+  { value: "Europe/Rome", label: "(UTC +01:00) Europe/Rome" },
+  { value: "Europe/Stockholm", label: "(UTC +01:00) Europe/Stockholm" },
+  { value: "Europe/Vienna", label: "(UTC +01:00) Europe/Vienna" },
+  { value: "Europe/Warsaw", label: "(UTC +01:00) Europe/Warsaw" },
+  { value: "Europe/Oslo", label: "(UTC +01:00) Europe/Oslo" },
+  { value: "Pacific/Auckland", label: "(UTC +12:00) Pacific/Auckland" }
 ] as const;
 
-const DATE_FORMAT_OPTIONS = [
-  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" },
-  { value: "MM-DD-YYYY", label: "MM-DD-YYYY" },
+export const DATE_FORMAT_OPTIONS = [
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Nigéria
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Egito
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // África do Sul
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Nigéria
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Angola
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Argentina
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // México
+  { value: "MM-DD-YYYY", label: "MM-DD-YYYY" }, // EUA
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Brasil
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Tailândia
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // China
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Índia
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Indonésia
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // Coreia do Sul
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // Japão
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Austrália
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Países Baixos
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // Alemanha
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Bélgica
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // Romênia
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY" }, // Portugal
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Reino Unido
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Espanha
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // Rússia
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // França
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // República Tcheca
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }, // Itália
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // Suécia
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // Áustria
+  { value: "YYYY-MM-DD", label: "YYYY-MM-DD" }, // Polônia
+  { value: "DD.MM.YYYY", label: "DD.MM.YYYY" }, // Noruega
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY" }  // Nova Zelândia
 ] as const;
 
 const DAY_START_OPTIONS = [
+  { value: "01:00", label: "01:00" },
+  { value: "01:30", label: "01:30" },
+  { value: "02:00", label: "02:00" },
+  { value: "02:30", label: "02:30" },
+  { value: "03:00", label: "03:00" },
+  { value: "03:30", label: "03:30" },
+  { value: "04:00", label: "04:00" },
+  { value: "04:30", label: "04:30" },
+  { value: "05:00", label: "05:00" },
+  { value: "05:30", label: "05:30" },
+  { value: "06:00", label: "06:00" },
+  { value: "06:30", label: "06:30" },
+  { value: "07:00", label: "07:00" },
+  { value: "07:30", label: "07:30" },
   { value: "08:00", label: "08:00" },
+  { value: "08:30", label: "08:30" },
   { value: "09:00", label: "09:00" },
+  { value: "09:30", label: "09:30" },
   { value: "10:00", label: "10:00" },
+  { value: "10:30", label: "10:30" },
+  { value: "11:00", label: "11:00" },
+  { value: "11:30", label: "11:30" },
+  { value: "12:00", label: "12:00" },
+  { value: "12:30", label: "12:30" },
+  { value: "13:00", label: "13:00" },
+  { value: "13:30", label: "13:30" },
+  { value: "14:00", label: "14:00" },
+  { value: "14:30", label: "14:30" },
+  { value: "15:00", label: "15:00" },
+  { value: "15:30", label: "15:30" },
+  { value: "16:00", label: "16:00" },
+  { value: "16:30", label: "16:30" },
+  { value: "17:00", label: "17:00" },
+  { value: "17:30", label: "17:30" },
+  { value: "18:00", label: "18:00" },
+  { value: "18:30", label: "18:30" },
+  { value: "19:00", label: "19:00" },
+  { value: "19:30", label: "19:30" },
+  { value: "20:00", label: "20:00" },
+  { value: "20:30", label: "20:30" },
+  { value: "21:00", label: "21:00" },
+  { value: "21:30", label: "21:30" },
+  { value: "22:00", label: "22:00" },
+  { value: "22:30", label: "22:30" },
+  { value: "23:00", label: "23:00" },
+  { value: "23:30", label: "23:30" },
+] as const;
+
+const END_START_OPTIONS = [
+  { value: "01:00", label: "01:00" },
+  { value: "01:30", label: "01:30" },
+  { value: "02:00", label: "02:00" },
+  { value: "02:30", label: "02:30" },
+  { value: "03:00", label: "03:00" },
+  { value: "03:30", label: "03:30" },
+  { value: "04:00", label: "04:00" },
+  { value: "04:30", label: "04:30" },
+  { value: "05:00", label: "05:00" },
+  { value: "05:30", label: "05:30" },
+  { value: "06:00", label: "06:00" },
+  { value: "06:30", label: "06:30" },
+  { value: "07:00", label: "07:00" },
+  { value: "07:30", label: "07:30" },
+  { value: "08:00", label: "08:00" },
+  { value: "08:30", label: "08:30" },
+  { value: "09:00", label: "09:00" },
+  { value: "09:30", label: "09:30" },
+  { value: "10:00", label: "10:00" },
+  { value: "10:30", label: "10:30" },
+  { value: "11:00", label: "11:00" },
+  { value: "11:30", label: "11:30" },
+  { value: "12:00", label: "12:00" },
+  { value: "12:30", label: "12:30" },
+  { value: "13:00", label: "13:00" },
+  { value: "13:30", label: "13:30" },
+  { value: "14:00", label: "14:00" },
+  { value: "14:30", label: "14:30" },
+  { value: "15:00", label: "15:00" },
+  { value: "15:30", label: "15:30" },
+  { value: "16:00", label: "16:00" },
+  { value: "16:30", label: "16:30" },
+  { value: "17:00", label: "17:00" },
+  { value: "17:30", label: "17:30" },
+  { value: "18:00", label: "18:00" },
+  { value: "18:30", label: "18:30" },
+  { value: "19:00", label: "19:00" },
+  { value: "19:30", label: "19:30" },
+  { value: "20:00", label: "20:00" },
+  { value: "20:30", label: "20:30" },
+  { value: "21:00", label: "21:00" },
+  { value: "21:30", label: "21:30" },
+  { value: "22:00", label: "22:00" },
+  { value: "22:30", label: "22:30" },
+  { value: "23:00", label: "23:00" },
+  { value: "23:30", label: "23:30" },
 ] as const;
 
 const HIDDEN_NOTIFICATION_KEYS: ReadonlyArray<NotificationPreferenceKey> = [
