@@ -1,5 +1,5 @@
-import { DEFAULT_LANGUAGE } from "@/lib/language";
-import { logger } from "@/lib/logger";
+import { logger } from "@/core/logger";
+import { DEFAULT_LANGUAGE } from "@/platform/i18n/language";
 
 const FORWARDED_HEADERS = [
   "accept",
@@ -17,9 +17,10 @@ function buildUpstreamUrl(request: Request, path: string[]) {
 
 async function proxyRequest(
   request: Request,
-  { params }: { params: { path: string[] } },
+  { params }: { params: Promise<{ path: string[] }> },
 ) {
-  const upstreamUrl = buildUpstreamUrl(request, params.path);
+  const resolvedParams = await params;
+  const upstreamUrl = buildUpstreamUrl(request, resolvedParams.path);
   const headers = new Headers();
 
   FORWARDED_HEADERS.forEach((headerName) => {
@@ -81,35 +82,35 @@ async function proxyRequest(
 
 export async function GET(
   request: Request,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return proxyRequest(request, context);
 }
 
 export async function POST(
   request: Request,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return proxyRequest(request, context);
 }
 
 export async function PUT(
   request: Request,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return proxyRequest(request, context);
 }
 
 export async function PATCH(
   request: Request,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return proxyRequest(request, context);
 }
 
 export async function DELETE(
   request: Request,
-  context: { params: { path: string[] } },
+  context: { params: Promise<{ path: string[] }> },
 ) {
   return proxyRequest(request, context);
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { normalizeLanguageTag } from "@/lib/language";
-import { logger } from "@/lib/logger";
+import { logger } from "@/core/logger";
+import { normalizeLanguageTag } from "@/platform/i18n/language";
 
 interface RefreshRequestBody {
   tenantId: number;

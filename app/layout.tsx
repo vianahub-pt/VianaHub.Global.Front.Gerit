@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { ClientLayout } from "./client-layout";
+import { ClientLayout } from "@/shared/layout/client-layout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +23,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function () {
-                var supported = ["pt-PT", "en-US", "es-ES"];
+                var supported = ["pt-PT", "pt-BR", "en-US", "es-ES"];
                 var stored = null;
                 try {
                   stored = window.localStorage.getItem("language");

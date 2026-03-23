@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { normalizeLanguageTag } from "@/lib/language";
-import { logger, redactEmail } from "@/lib/logger";
+import { logger, redactEmail } from "@/core/logger";
+import { normalizeLanguageTag } from "@/platform/i18n/language";
 
 interface LoginRequestBody {
-  tenantId: number;
   email: string;
   password: string;
 }
@@ -16,8 +15,6 @@ function isLoginRequestBody(payload: unknown): payload is LoginRequestBody {
   const candidate = payload as Partial<LoginRequestBody>;
 
   return (
-    typeof candidate.tenantId === "number" &&
-    Number.isFinite(candidate.tenantId) &&
     typeof candidate.email === "string" &&
     candidate.email.trim().length > 0 &&
     typeof candidate.password === "string" &&
@@ -56,7 +53,7 @@ export async function POST(request: Request) {
     });
 
     return buildJsonResponse(
-      { message: "Tenant, e-mail e password sao obrigatorios." },
+      { message: "Email e password sao obrigatorios." },
       400,
     );
   }
@@ -67,7 +64,6 @@ export async function POST(request: Request) {
     );
     logger.info("Tentativa de autenticacao iniciada", {
       context: "api.auth.login",
-      tenantId: payload.tenantId,
       email: redactEmail(payload.email),
     });
 
@@ -95,7 +91,6 @@ export async function POST(request: Request) {
     if (!upstreamResponse.ok) {
       logger.warn("Autenticacao rejeitada pelo servico remoto", {
         context: "api.auth.login",
-        tenantId: payload.tenantId,
         email: redactEmail(payload.email),
         statusCode: upstreamResponse.status,
       });
@@ -122,12 +117,11 @@ export async function POST(request: Request) {
 
     return buildJsonResponse(parsedBody ?? {}, upstreamResponse.status);
   } catch (error) {
-    logger.error("Erro ao contactar servico remoto de autenticacao", {
-      context: "api.auth.login",
-      tenantId: payload.tenantId,
-      email: redactEmail(payload.email),
-      error,
-    });
+      logger.error("Erro ao contactar servico remoto de autenticacao", {
+        context: "api.auth.login",
+        email: redactEmail(payload.email),
+        error,
+      });
 
     return buildJsonResponse(
       { message: "Nao foi possivel contactar o servico de autenticacao." },
