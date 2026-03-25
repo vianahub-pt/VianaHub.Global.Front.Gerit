@@ -12,6 +12,12 @@ import {
   type HubGridColumn,
   type RowDensity,
 } from "@/shared/hub-grid";
+import {
+  useIdentityPreferences,
+  type DateFormatPreference,
+  type PreferenceLocale,
+  type TimeFormatPreference,
+} from "@/domains/identity/preferences";
 
 interface UserItem {
   id: number;
@@ -164,10 +170,88 @@ function parsePagedUsers(payload: unknown) {
   };
 }
 
+function formatLastAccess(
+  value: string,
+  options: {
+    locale: PreferenceLocale;
+    timezone: string;
+    dateFormat: DateFormatPreference;
+    timeFormat: TimeFormatPreference;
+  },
+): string {
+  if (!value) {
+    return "-";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "-";
+  }
+
+  const resolvedTimeZone = options.timezone || "UTC";
+
+  try {
+    const formatter = new Intl.DateTimeFormat(options.locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: options.timeFormat === "12h",
+      timeZone: resolvedTimeZone,
+    });
+    const parts = formatter.formatToParts(parsed);
+    const partValues: Record<string, string> = {};
+
+    parts.forEach((part) => {
+      if (part.type !== "literal") {
+        partValues[part.type] = part.value;
+      }
+    });
+
+    const day = partValues.day ?? "";
+    const month = partValues.month ?? "";
+    const year = partValues.year ?? "";
+    const hour = partValues.hour ?? "";
+    const minute = partValues.minute ?? "";
+    const dayPeriod = partValues.dayPeriod ?? "";
+
+    if (!day || !month || !year || !hour || !minute) {
+      return "-";
+    }
+
+    let formattedDate = "";
+    if (options.dateFormat === "MM/DD/YYYY") {
+      formattedDate = `${month}/${day}/${year}`;
+    } else if (options.dateFormat === "DD/MM/YYYY") {
+      formattedDate = `${day}/${month}/${year}`;
+    } else {
+      formattedDate = `${day}-${month}-${year}`;
+    }
+
+    let formattedTime = `${hour}:${minute}`;
+    if (options.timeFormat === "12h") {
+      const period = dayPeriod || (Number(hour) >= 12 ? "PM" : "AM");
+      formattedTime = `${hour}:${minute} ${period}`;
+    }
+
+    return `${formattedDate} ${formattedTime}`;
+  } catch {
+    return "-";
+  }
+}
+
 export function UsersPage() {
   const { fetchWithAuth, isAuthenticated, isHydrating } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const preferences = useIdentityPreferences();
+  const {
+    dateFormat: userDateFormat,
+    timeFormat: userTimeFormat,
+    timezone: userTimeZone,
+    locale: userLocale,
+  } = preferences.state;
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("active");
   const [page, setPage] = useState(1);
@@ -509,9 +593,14 @@ export function UsersPage() {
       user.name,
       user.email,
       user.phoneNumber || "-",
-      user.lastAccessAt || "-",
+      formatLastAccess(user.lastAccessAt, {
+        locale: userLocale,
+        timezone: userTimeZone,
+        dateFormat: userDateFormat,
+        timeFormat: userTimeFormat,
+      }),
     ],
-    [],
+    [userDateFormat, userTimeFormat, userTimeZone, userLocale],
   );
 
   const renderUserStatus = useCallback(

@@ -1,6 +1,6 @@
 {
   "language.name.pt-PT": "🇵🇹 Portuguese",
-  "language.name.pt-BR": "🇧🇷 Portuguese",
+  "language.name.pt-BR": "🇧🇷 Portuguese (Brazil)",
   "language.name.en-US": "🇺🇸 English",
   "language.name.es-ES": "🇪🇸 Spanish",
   "language.short.pt-PT": "PT",
@@ -58,6 +58,7 @@
   "workspace.sidebar.supportingData": "Supporting Data",
   "workspace.sidebar.overview": "Overview",
   "workspace.sidebar.users": "Users",
+  "workspace.sidebar.roles": "Roles",
   "workspace.sidebar.settings": "Settings",
   "dashboard.tabs.calendar": "CALENDAR",
   "dashboard.tabs.month": "Month",
