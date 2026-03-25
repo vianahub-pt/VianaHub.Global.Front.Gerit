@@ -3,3 +3,4 @@ export const operationsTeamMembersModule = {
   resource: "teammembers",
 } as const;
 
+export * from "@/domains/operations/team-members/team-members-page";

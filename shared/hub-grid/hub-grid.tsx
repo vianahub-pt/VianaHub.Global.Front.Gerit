@@ -162,8 +162,8 @@ export function HubGrid<Item>({
                   className={clsx(
                     "h-8 min-w-[3rem] rounded-sm border px-3 text-[0.55rem] font-semibold uppercase tracking-[0.14em] transition-colors",
                     isActive
-                      ? "border-[#0fb3ff] bg-[#0d1c29] text-white"
-                      : "border-[#213342] bg-[#0b151f] text-[#9eb1bc] hover:border-[#0fb3ff] hover:text-white",
+                      ? "bg-[#131313] dark:bg-[#8EE0FB] text-[#ffffff] dark:text-[#000000] hover:border-[#0fb3ff] hover:text-white"
+                      : "border-[#0fb3ff] dark:border-[#0fb3ff] bg-[#f4f6fb] dark:bg-[#0d1c29] text-[#08AEE5] dark:text-[#08AEE5]",
                   )}
                 >
                   {option.label}
@@ -172,7 +172,7 @@ export function HubGrid<Item>({
             })}
           </div>
         </div>
-        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.3em] text-[#7aa4c0]">
+        <p className="mt-4 text-xs font-semibold text-[#000000] dark:text-[#8EE0FB]">
           {pageCaption}
         </p>
       </div>
@@ -208,7 +208,7 @@ export function HubGrid<Item>({
                     <th
                       key={column.key}
                       className={clsx(
-                        "px-4 font-medium",
+                        "px-4 font-medium text-center",
                         rowDensityCellPadding,
                         column.headerClassName,
                         hasLeftBorder &&
@@ -322,8 +322,8 @@ export function HubGrid<Item>({
                             rowDensityCellPadding,
                             column.cellClassName,
                             columnIndex > 0 &&
-                              "border-l border-[#e4e8f0]/60 dark:border-[#22323d]",
-                            "border-b border-[#dfe6ed]/70 dark:border-[#14222d]",
+                              "border-l border-[#e4e8f0]/60 dark:border-[#12202c]",
+                            "border-b border-[#dfe6ed]/70 dark:border-[#12202c]",
                           )}
                         >
                           {cells[columnIndex]}
@@ -370,7 +370,7 @@ export function HubGrid<Item>({
             type="button"
             disabled={page <= 1 || loading}
             onClick={handlePreviousPage}
-            className="flex h-9 items-center justify-center rounded-sm border border-[#142435] bg-[#09111a] px-4 text-sm font-semibold text-[#8ea6be] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center justify-center rounded-sm border border-[#142435] bg-[#131313] dark:bg-[#8EE0FB] px-4 text-sm font-semibold text-[#ffffff] dark:text-[#000000] disabled:cursor-not-allowed disabled:opacity-80"
           >
             {paginationPreviousLabel}
           </button>
@@ -383,7 +383,7 @@ export function HubGrid<Item>({
                 "flex h-9 min-w-[2.75rem] items-center justify-center rounded-sm px-3 text-sm font-semibold transition-colors",
                 pageNumber === page
                   ? "bg-[#08aee5] text-white"
-                  : "border border-[#142435] bg-[#09111a] text-[#8ea6be] hover:border-[#0fb3ff] hover:text-white",
+                  : "border border-[#0fb3ff] dark:border-[#0fb3ff] bg-[#f4f6fb] dark:bg-[#0d1c29] text-[#08AEE5] dark:text-[#08AEE5]",
               )}
             >
               {pageNumber}
@@ -393,16 +393,16 @@ export function HubGrid<Item>({
             type="button"
             disabled={page >= totalPages || loading}
             onClick={handleNextPage}
-            className="flex h-9 items-center justify-center rounded-sm border border-[#142435] bg-[#09111a] px-4 text-sm font-semibold text-[#8ea6be] disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-9 items-center justify-center rounded-sm border border-[#142435] bg-[#131313] dark:bg-[#8EE0FB] px-4 text-sm font-semibold text-[#ffffff] dark:text-[#000000] disabled:cursor-not-allowed disabled:opacity-80"
           >
             {paginationNextLabel}
           </button>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <span className="text-sm text-[#9eb1bc]">
+          <span className="text-sm text-[#000000] dark:text-[#8EE0FB]">
             {paginationPageLabel} {page} / {totalPages}
           </span>
-          <label className="flex items-center gap-2 text-sm text-[#9eb1bc]">
+          <label className="flex items-center gap-2 text-sm text-[#000000] dark:text-[#8EE0FB]">
             <span>{paginationPerPageLabel}</span>
             <select
               value={pageSize}

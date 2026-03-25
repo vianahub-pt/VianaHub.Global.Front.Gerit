@@ -204,17 +204,17 @@ export function EquipmentsPage() {
       {
         key: "Name",
         label: t("equipments.table.name"),
-        cellClassName: "font-semibold",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
         key: "SerialNumber",
         label: t("equipments.table.serialNumber"),
-        cellClassName: "text-[#a4bac6]",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
         key: "Type",
         label: t("equipments.table.type"),
-        cellClassName: "text-[#a4bac6]",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
     ],
     [t],
@@ -541,8 +541,8 @@ export function EquipmentsPage() {
         className={clsx(
           "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
           equipment.isActive
-            ? "bg-[#0f3a2e] text-[#65debb]"
-            : "bg-[#4a2c34] text-[#f6a8bb]",
+            ? "text-[#3E515B] dark:text-[#84a0c0]"
+            : "text-[#3E515B] dark:text-[#84a0c0]",
         )}
       >
         {equipment.isActive
@@ -562,10 +562,10 @@ export function EquipmentsPage() {
             event.stopPropagation();
             handleEquipmentSelection(equipment);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
           title={t("equipments.actions.edit")}
         >
-          <SquarePen className="h-4 w-4" />
+          <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -573,14 +573,14 @@ export function EquipmentsPage() {
             event.stopPropagation();
             void handleToggleStatus(equipment);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
           title={
             equipment.isActive
               ? t("equipments.actions.deactivate")
               : t("equipments.actions.activate")
           }
         >
-          <Power className="h-4 w-4" />
+          <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -588,10 +588,10 @@ export function EquipmentsPage() {
             event.stopPropagation();
             void handleDeleteEquipment(equipment);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#70404d] text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#ffd7e1]"
           title={t("equipments.actions.delete")}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
       </div>
     ),

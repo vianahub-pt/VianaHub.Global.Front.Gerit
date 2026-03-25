@@ -182,12 +182,12 @@ export function TeamsPage() {
       {
         key: "Name",
         label: t("teams.table.name"),
-        cellClassName: "font-semibold",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
         key: "Description",
         label: t("teams.table.description"),
-        cellClassName: "text-[#a4bac6]",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
     ],
     [t],
@@ -491,8 +491,8 @@ export function TeamsPage() {
         className={clsx(
           "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
           team.isActive
-            ? "bg-[#0f3a2e] text-[#65debb]"
-            : "bg-[#4a2c34] text-[#f6a8bb]",
+            ? "text-[#3E515B] dark:text-[#84a0c0]"
+            : "text-[#3E515B] dark:text-[#84a0c0]",
         )}
       >
         {team.isActive ? t("teams.status.active") : t("teams.status.inactive")}
@@ -510,10 +510,10 @@ export function TeamsPage() {
             event.stopPropagation();
             handleTeamSelection(team);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d9dee2] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
           title={t("teams.actions.edit")}
         >
-          <SquarePen className="h-4 w-4" />
+          <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -521,14 +521,14 @@ export function TeamsPage() {
             event.stopPropagation();
             void handleToggleStatus(team);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d9dee2] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
           title={
             team.isActive
               ? t("teams.actions.deactivate")
               : t("teams.actions.activate")
           }
         >
-          <Power className="h-4 w-4" />
+          <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -536,10 +536,10 @@ export function TeamsPage() {
             event.stopPropagation();
             void handleDeleteTeam(team);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d9dee2] text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#ffd7e1]"
           title={t("teams.actions.delete")}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
       </div>
     ),
@@ -689,7 +689,7 @@ export function TeamsPage() {
                 <h1 className="text-3xl font-semibold tracking-[0.03em] text-[#0f172a] dark:text-white">
                   {t("teams.title")}
                 </h1>
-                <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[#7aa4c0] dark:text-[#84a0c0]">
+                <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[#000000] dark:text-[#84a0c0]">
                   {t("teams.subtitle")}
                 </p>
               </div>

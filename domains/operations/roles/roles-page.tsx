@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { SquarePen, Trash2, UserRoundPlus, Power, Loader2 } from "lucide-react";
+import { SquarePen, Trash2, RoleRoundPlus, Power, Loader2 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/platform/auth";
 import { useTranslation } from "@/platform/i18n";
@@ -13,15 +13,14 @@ import {
   type RowDensity,
 } from "@/shared/hub-grid";
 
-interface VehicleItem {
+interface RoleItem {
   id: number;
-  licensePlate: string;
-  brand: string;
-  model: string;
+  name: string;
+  description: string;
   isActive: boolean;
 }
 
-interface VehiclesPagedResponse {
+interface RolesPagedResponse {
   items?: unknown;
   data?: unknown;
   totalItems?: unknown;
@@ -30,24 +29,23 @@ interface VehiclesPagedResponse {
   totalPages?: number;
 }
 
-interface VehicleFormState {
-  licensePlate: string;
-  brand: string;
-  model: string;
+interface RoleFormState {
+  name: string;
+  description: string;
 }
 
-type SortColumn = "LicensePlate" | "Brand" | "Model";
+type SortColumn = "Name" | "Role" | "TaxNumber";
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 500, 1000] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
-type VehicleStatusFilter = "active" | "inactive" | "all";
-type VehicleDetailMode = "hidden" | "create" | "edit";
+type RoleStatusFilter = "active" | "inactive" | "all";
+type RoleDetailMode = "hidden" | "create" | "edit";
 
-const initialVehicleFormState: VehicleFormState = {
-  licensePlate: "",
-  brand: "",
-  model: "",
+const initialRoleFormState: RoleFormState = {
+  name: "",
+  description: "",
 };
-function normalizeVehicle(payload: unknown): VehicleItem | null {
+
+function normalizeRole(payload: unknown): RoleItem | null {
   if (typeof payload !== "object" || payload === null) {
     return null;
   }
@@ -56,35 +54,17 @@ function normalizeVehicle(payload: unknown): VehicleItem | null {
   const rawId =
     typeof candidate.id === "number"
       ? candidate.id
-      : typeof candidate.vehicleId === "number"
-        ? candidate.vehicleId
+      : typeof candidate.roleId === "number"
+        ? candidate.roleId
         : null;
 
   if (rawId === null) {
     return null;
   }
 
-  const licensePlate =
-    typeof candidate.licensePlate === "string"
-      ? candidate.licensePlate
-      : typeof candidate.plate === "string"
-        ? candidate.plate
-        : "";
-
-  const brand =
-    typeof candidate.brand === "string"
-      ? candidate.brand
-      : typeof candidate.make === "string"
-        ? candidate.make
-        : "";
-
-  const model =
-    typeof candidate.model === "string"
-      ? candidate.model
-      : typeof candidate.type === "string"
-        ? candidate.type
-        : "";
-
+  const nameValue = typeof candidate.name === "string" ? candidate.name : "";
+  const descriptionValue =
+    typeof candidate.description === "string" ? candidate.description : "";
   const isActiveValue =
     typeof candidate.isActive === "boolean"
       ? candidate.isActive
@@ -92,15 +72,14 @@ function normalizeVehicle(payload: unknown): VehicleItem | null {
         ? candidate.active
         : true;
 
-  if (!licensePlate || !brand) {
+  if (!nameValue) {
     return null;
   }
 
   return {
     id: rawId,
-    licensePlate,
-    brand,
-    model,
+    name: nameValue,
+    description: descriptionValue,
     isActive: Boolean(isActiveValue),
   };
 }
@@ -146,12 +125,12 @@ function normalizeErrorMessage(payload: unknown, fallback: string) {
   return fallback;
 }
 
-function parsePagedVehicles(payload: unknown) {
+function parsePagedRoles(payload: unknown) {
   if (typeof payload !== "object" || payload === null) {
-    return { items: [] as VehicleItem[], totalItems: 0 };
+    return { items: [] as RoleItem[], totalItems: 0 };
   }
 
-  const candidate = payload as VehiclesPagedResponse;
+  const candidate = payload as RolesPagedResponse;
   const rawItems = Array.isArray(candidate.items)
     ? candidate.items
     : Array.isArray((candidate as { data?: unknown }).data)
@@ -159,8 +138,8 @@ function parsePagedVehicles(payload: unknown) {
       : [];
 
   const items = rawItems
-    .map(normalizeVehicle)
-    .filter((item): item is VehicleItem => item !== null);
+    .map(normalizeRole)
+    .filter((item): item is RoleItem => item !== null);
 
   const totalItemsValue =
     typeof candidate.totalItems === "number"
@@ -173,51 +152,41 @@ function parsePagedVehicles(payload: unknown) {
   };
 }
 
-export function VehiclesPage() {
+export function RolesPage() {
   const { fetchWithAuth, isAuthenticated, isHydrating } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] =
-    useState<VehicleStatusFilter>("active");
+  const [statusFilter, setStatusFilter] = useState<RoleStatusFilter>("active");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSizeOption>(10);
   const [rowDensity, setRowDensity] = useState<RowDensity>("medium");
-  const [sortBy, setSortBy] = useState<SortColumn>("LicensePlate");
+  const [sortBy, setSortBy] = useState<SortColumn>("Name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [totalItems, setTotalItems] = useState(0);
   const [totalPagesFromServer, setTotalPagesFromServer] = useState(1);
-  const [vehicles, setVehicles] = useState<VehicleItem[]>([]);
+  const [roles, setRoles] = useState<RoleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<VehicleItem | null>(
-    null,
-  );
-  const [vehicleDetailMode, setVehicleDetailMode] = useState<
-    "hidden" | "create" | "edit"
-  >("hidden");
-  const [formState, setFormState] = useState<VehicleFormState>(
-    initialVehicleFormState,
-  );
+  const [selectedRole, setSelectedRole] = useState<RoleItem | null>(null);
+  const [roleDetailMode, setRoleDetailMode] =
+    useState<RoleDetailMode>("hidden");
+  const [formState, setFormState] =
+    useState<RoleFormState>(initialRoleFormState);
   const [bulkUploading, setBulkUploading] = useState(false);
 
-  const detailVisible = vehicleDetailMode !== "hidden";
+  const detailVisible = roleDetailMode !== "hidden";
 
-  const vehicleColumns = useMemo<HubGridColumn<VehicleItem>[]>(
+  const roleColumns = useMemo<HubGridColumn<RoleItem>[]>(
     () => [
       {
-        key: "LicensePlate",
-        label: t("vehicles.table.plate"),
+        key: "Name",
+        label: t("roles.table.name"),
         cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
-        key: "Brand",
-        label: t("vehicles.table.brand"),
-        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
-      },
-      {
-        key: "Model",
-        label: t("vehicles.table.model"),
+        key: "Email",
+        label: t("roles.table.description"),
         cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
     ],
@@ -226,40 +195,39 @@ export function VehiclesPage() {
 
   const densityOptions = useMemo(
     () => [
-      { key: "compact" as RowDensity, label: t("vehicles.grid.density.slow") },
-      { key: "medium" as RowDensity, label: t("vehicles.grid.density.medium") },
+      { key: "compact" as RowDensity, label: t("roles.grid.density.slow") },
+      { key: "medium" as RowDensity, label: t("roles.grid.density.medium") },
       {
         key: "expanded" as RowDensity,
-        label: t("vehicles.grid.density.expanded"),
+        label: t("roles.grid.density.expanded"),
       },
     ],
     [t],
   );
 
   const resetForm = useCallback(() => {
-    setFormState(initialVehicleFormState);
+    setFormState(initialRoleFormState);
   }, []);
 
   const hideDetail = useCallback(() => {
-    setSelectedVehicle(null);
-    setVehicleDetailMode("hidden");
+    setSelectedRole(null);
+    setRoleDetailMode("hidden");
     resetForm();
   }, [resetForm]);
 
   const showCreateForm = useCallback(() => {
-    setSelectedVehicle(null);
-    setVehicleDetailMode("create");
+    setSelectedRole(null);
+    setRoleDetailMode("create");
     resetForm();
   }, [resetForm]);
 
-  const handleVehicleSelection = useCallback((vehicle: VehicleItem) => {
-    setSelectedVehicle(vehicle);
+  const handleRoleSelection = useCallback((role: RoleItem) => {
+    setSelectedRole(role);
     setFormState({
-      licensePlate: vehicle.licensePlate,
-      brand: vehicle.brand,
-      model: vehicle.model,
+      name: role.name,
+      description: role.description,
     });
-    setVehicleDetailMode("edit");
+    setRoleDetailMode("edit");
   }, []);
 
   const handleSort = useCallback(
@@ -281,7 +249,7 @@ export function VehiclesPage() {
     setPage(1);
   }, []);
 
-  const handleStatusFilterChange = useCallback((value: VehicleStatusFilter) => {
+  const handleStatusFilterChange = useCallback((value: RoleStatusFilter) => {
     setStatusFilter(value);
     setPage(1);
   }, []);
@@ -291,7 +259,7 @@ export function VehiclesPage() {
     setPage(1);
   }, []);
 
-  const loadVehicles = useCallback(async () => {
+  const loadRoles = useCallback(async () => {
     setLoading(true);
 
     const query = new URLSearchParams({
@@ -308,22 +276,20 @@ export function VehiclesPage() {
 
     try {
       const response = await fetchWithAuth(
-        `/api/gerit/v1/vehicles/paged?${query.toString()}`,
+        `/api/gerit/v1/roles/paged?${query.toString()}`,
         {
           method: "GET",
         },
       );
 
       const payload = (await response.json().catch(() => null)) as unknown;
-      const candidate = payload as VehiclesPagedResponse;
+      const candidate = payload as RolesPagedResponse;
 
       if (!response.ok) {
-        throw new Error(
-          normalizeErrorMessage(payload, t("vehicles.errors.load")),
-        );
+        throw new Error(normalizeErrorMessage(payload, t("roles.errors.load")));
       }
 
-      const parsed = parsePagedVehicles(payload);
+      const parsed = parsePagedRoles(payload);
       const serverPageNumber =
         typeof candidate.pageNumber === "number" ? candidate.pageNumber : page;
       const serverPageSize =
@@ -343,18 +309,18 @@ export function VehiclesPage() {
               Math.ceil(serverTotalItems / Math.max(1, normalizedPageSize)),
             );
 
-      setVehicles(parsed.items);
+      setRoles(parsed.items);
       setTotalItems(serverTotalItems);
       setTotalPagesFromServer(serverTotalPages);
       setPage(serverPageNumber);
       setPageSize(normalizedPageSize);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : t("vehicles.errors.load");
-      setVehicles([]);
+        error instanceof Error ? error.message : t("roles.errors.load");
+      setRoles([]);
       setTotalItems(0);
       toast({
-        title: t("vehicles.toasts.errorTitle"),
+        title: t("roles.toasts.errorTitle"),
         description: message,
         variant: "destructive",
       });
@@ -374,12 +340,12 @@ export function VehiclesPage() {
   ]);
 
   const handleToggleStatus = useCallback(
-    async (vehicle: VehicleItem) => {
-      const action = vehicle.isActive ? "deactivate" : "activate";
+    async (role: RoleItem) => {
+      const action = role.isActive ? "deactivate" : "activate";
 
       try {
         const response = await fetchWithAuth(
-          `/api/gerit/v1/vehicles/${vehicle.id}/${action}`,
+          `/api/gerit/v1/roles/${role.id}/${action}`,
           {
             method: "PATCH",
           },
@@ -389,36 +355,34 @@ export function VehiclesPage() {
 
         if (!response.ok) {
           throw new Error(
-            normalizeErrorMessage(payload, t("vehicles.errors.status")),
+            normalizeErrorMessage(payload, t("roles.errors.status")),
           );
         }
 
         toast({
-          title: t("vehicles.toasts.successTitle"),
-          description: vehicle.isActive
-            ? t("vehicles.toasts.deactivated")
-            : t("vehicles.toasts.activated"),
+          title: t("roles.toasts.successTitle"),
+          description: role.isActive
+            ? t("roles.toasts.deactivated")
+            : t("roles.toasts.activated"),
         });
 
-        void loadVehicles();
+        void loadRoles();
       } catch (error) {
         toast({
-          title: t("vehicles.toasts.errorTitle"),
+          title: t("roles.toasts.errorTitle"),
           description:
-            error instanceof Error
-              ? error.message
-              : t("vehicles.errors.status"),
+            error instanceof Error ? error.message : t("roles.errors.status"),
           variant: "destructive",
         });
       }
     },
-    [fetchWithAuth, loadVehicles, t, toast],
+    [fetchWithAuth, loadRoles, t, toast],
   );
 
-  const handleDeleteVehicle = useCallback(
-    async (vehicle: VehicleItem) => {
+  const handleDeleteRole = useCallback(
+    async (role: RoleItem) => {
       const confirmed = window.confirm(
-        t("vehicles.confirm.delete", { licensePlate: vehicle.licensePlate }),
+        t("roles.confirm.delete", { name: role.name }),
       );
 
       if (!confirmed) {
@@ -426,40 +390,35 @@ export function VehiclesPage() {
       }
 
       try {
-        const response = await fetchWithAuth(
-          `/api/gerit/v1/vehicles/${vehicle.id}`,
-          {
-            method: "DELETE",
-          },
-        );
+        const response = await fetchWithAuth(`/api/gerit/v1/roles/${role.id}`, {
+          method: "DELETE",
+        });
 
         const payload = (await response.json().catch(() => null)) as unknown;
 
         if (!response.ok) {
           throw new Error(
-            normalizeErrorMessage(payload, t("vehicles.errors.delete")),
+            normalizeErrorMessage(payload, t("roles.errors.delete")),
           );
         }
 
         toast({
-          title: t("vehicles.toasts.successTitle"),
-          description: t("vehicles.toasts.deleted"),
+          title: t("roles.toasts.successTitle"),
+          description: t("roles.toasts.deleted"),
         });
 
         hideDetail();
-        await loadVehicles();
+        await loadRoles();
       } catch (error) {
         toast({
-          title: t("vehicles.toasts.errorTitle"),
+          title: t("roles.toasts.errorTitle"),
           description:
-            error instanceof Error
-              ? error.message
-              : t("vehicles.errors.delete"),
+            error instanceof Error ? error.message : t("roles.errors.delete"),
           variant: "destructive",
         });
       }
     },
-    [fetchWithAuth, hideDetail, loadVehicles, t, toast],
+    [fetchWithAuth, hideDetail, loadRoles, t, toast],
   );
 
   const handleBulkUpload = useCallback(
@@ -475,7 +434,7 @@ export function VehiclesPage() {
         formData.append("file", file);
 
         const response = await fetchWithAuth(
-          "/api/gerit/v1/vehicles/bulk-upload",
+          "/api/gerit/v1/roles/bulk-upload",
           {
             method: "POST",
             body: formData,
@@ -488,29 +447,29 @@ export function VehiclesPage() {
           throw new Error(
             normalizeErrorMessage(
               payload,
-              t("vehicles.bulk.upload.error", {
-                resource: t("vehicles.title"),
+              t("roles.bulk.upload.error", {
+                resource: t("roles.title"),
               }),
             ),
           );
         }
 
         toast({
-          title: t("vehicles.toasts.successTitle"),
-          description: t("vehicles.bulk.upload.success", {
-            resource: t("vehicles.title"),
+          title: t("roles.toasts.successTitle"),
+          description: t("roles.bulk.upload.success", {
+            resource: t("roles.title"),
           }),
         });
 
-        await loadVehicles();
+        await loadRoles();
       } catch (error) {
         toast({
-          title: t("vehicles.toasts.errorTitle"),
+          title: t("roles.toasts.errorTitle"),
           description:
             error instanceof Error
               ? error.message
-              : t("vehicles.bulk.upload.error", {
-                  resource: t("vehicles.title"),
+              : t("roles.bulk.upload.error", {
+                  resource: t("roles.title"),
                 }),
           variant: "destructive",
         });
@@ -518,47 +477,41 @@ export function VehiclesPage() {
         setBulkUploading(false);
       }
     },
-    [bulkUploading, fetchWithAuth, loadVehicles, t, toast],
+    [bulkUploading, fetchWithAuth, loadRoles, t, toast],
   );
 
-  const vehicleRowCells = useCallback(
-    (vehicle: VehicleItem) => [
-      vehicle.licensePlate,
-      vehicle.brand,
-      vehicle.model,
-    ],
+  const roleRowCells = useCallback(
+    (role: RoleItem) => [role.name, role.description || "-"],
     [],
   );
 
-  const renderVehicleStatus = useCallback(
-    (vehicle: VehicleItem) => (
+  const renderRoleStatus = useCallback(
+    (role: RoleItem) => (
       <span
         className={clsx(
           "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-          vehicle.isActive
+          role.isActive
             ? "text-[#3E515B] dark:text-[#84a0c0]"
             : "text-[#3E515B] dark:text-[#84a0c0]",
         )}
       >
-        {vehicle.isActive
-          ? t("vehicles.status.active")
-          : t("vehicles.status.inactive")}
+        {role.isActive ? t("roles.status.active") : t("roles.status.inactive")}
       </span>
     ),
     [t],
   );
 
-  const renderVehicleActions = useCallback(
-    (vehicle: VehicleItem) => (
+  const renderRoleActions = useCallback(
+    (role: RoleItem) => (
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            handleVehicleSelection(vehicle);
+            handleRoleSelection(role);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
-          title={t("vehicles.actions.edit")}
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
+          title={t("roles.actions.edit")}
         >
           <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
@@ -566,13 +519,13 @@ export function VehiclesPage() {
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            void handleToggleStatus(vehicle);
+            void handleToggleStatus(role);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#0cbbf6] dark:border-[#000000] dark:text-[#9eb1bc] dark:hover:text-white"
           title={
-            vehicle.isActive
-              ? t("vehicles.actions.deactivate")
-              : t("vehicles.actions.activate")
+            role.isActive
+              ? t("roles.actions.deactivate")
+              : t("roles.actions.activate")
           }
         >
           <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
@@ -581,16 +534,16 @@ export function VehiclesPage() {
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            void handleDeleteVehicle(vehicle);
+            void handleDeleteRole(role);
           }}
           className="inline-flex h-8 w-8 items-center justify-center text-[#000000] dark:text-[#8EE0FB] transition-colors hover:text-[#ffd7e1]"
-          title={t("vehicles.actions.delete")}
+          title={t("roles.actions.delete")}
         >
           <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
       </div>
     ),
-    [handleVehicleSelection, handleDeleteVehicle, handleToggleStatus, t],
+    [handleRoleSelection, handleDeleteRole, handleToggleStatus, t],
   );
 
   const gridToolbar = useMemo(
@@ -600,7 +553,7 @@ export function VehiclesPage() {
           {bulkUploading ? (
             <Loader2 className="h-4 w-4 animate-spin text-[#08aee5]" />
           ) : null}
-          {t("vehicles.bulk.upload.label")}
+          {t("roles.bulk.upload.label")}
           <input
             type="file"
             accept=".csv"
@@ -618,8 +571,8 @@ export function VehiclesPage() {
           onClick={showCreateForm}
           className="inline-flex h-10 items-center gap-2 rounded-sm bg-[#08aee5] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#0cbbf6]"
         >
-          <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
-          {t("vehicles.actions.add")}
+          <RoleRoundPlus className="h-4 w-4" aria-hidden="true" />
+          {t("roles.actions.add")}
         </button>
       </div>
     ),
@@ -628,21 +581,20 @@ export function VehiclesPage() {
 
   useEffect(() => {
     if (!isHydrating && isAuthenticated) {
-      void loadVehicles();
+      void loadRoles();
     }
-  }, [isAuthenticated, isHydrating, loadVehicles]);
+  }, [isAuthenticated, isHydrating, loadRoles]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const licensePlate = formState.licensePlate.trim();
-    const brand = formState.brand.trim();
-    const model = formState.model.trim();
+    const name = formState.name.trim();
+    const description = formState.description.trim();
 
-    if (!licensePlate || !brand) {
+    if (!name) {
       toast({
-        title: t("vehicles.toasts.validationTitle"),
-        description: t("vehicles.validation.required"),
+        title: t("roles.toasts.validationTitle"),
+        description: t("roles.validation.required"),
         variant: "destructive",
       });
       return;
@@ -652,15 +604,14 @@ export function VehiclesPage() {
 
     try {
       const payload = {
-        licensePlate,
-        brand,
-        model: model.length > 0 ? model : null,
+        name,
+        description: description.length > 0 ? description : null,
       };
 
-      const isEditing = selectedVehicle !== null;
+      const isEditing = selectedRole !== null;
       const endpoint = isEditing
-        ? `/api/gerit/v1/vehicles/${selectedVehicle?.id ?? ""}`
-        : "/api/gerit/v1/vehicles";
+        ? `/api/gerit/v1/roles/${selectedRole?.id ?? ""}`
+        : "/api/gerit/v1/roles";
 
       const response = await fetchWithAuth(endpoint, {
         method: isEditing ? "PUT" : "POST",
@@ -676,34 +627,33 @@ export function VehiclesPage() {
 
       if (!response.ok) {
         throw new Error(
-          normalizeErrorMessage(responsePayload, t("vehicles.errors.save")),
+          normalizeErrorMessage(responsePayload, t("roles.errors.save")),
         );
       }
 
-      const normalized = normalizeVehicle(responsePayload);
+      const normalized = normalizeRole(responsePayload);
 
       if (normalized) {
-        setSelectedVehicle(normalized);
+        setSelectedRole(normalized);
         setFormState({
-          licensePlate: normalized.licensePlate,
-          brand: normalized.brand,
-          model: normalized.model,
+          name: normalized.name,
+          description: normalized.description,
         });
-        setVehicleDetailMode("edit");
+        setRoleDetailMode("edit");
       }
 
       toast({
-        title: t("vehicles.toasts.successTitle"),
+        title: t("roles.toasts.successTitle"),
         description: isEditing
-          ? t("vehicles.toasts.updated")
-          : t("vehicles.toasts.created"),
+          ? t("roles.toasts.updated")
+          : t("roles.toasts.created"),
       });
-      await loadVehicles();
+      await loadRoles();
     } catch (error) {
       toast({
-        title: t("vehicles.toasts.errorTitle"),
+        title: t("roles.toasts.errorTitle"),
         description:
-          error instanceof Error ? error.message : t("vehicles.errors.save"),
+          error instanceof Error ? error.message : t("roles.errors.save"),
         variant: "destructive",
       });
     } finally {
@@ -737,10 +687,10 @@ export function VehiclesPage() {
             <div className="flex items-center justify-between gap-4 border-b border-[#dfe6ed]/70 bg-[#f4f6fb] px-6 py-5 dark:border-[#162235] dark:bg-[#0d1c29]">
               <div>
                 <h1 className="text-3xl font-semibold tracking-[0.03em] text-[#0f172a] dark:text-white">
-                  {t("vehicles.title")}
+                  {t("roles.title")}
                 </h1>
-                <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[#7aa4c0] dark:text-[#84a0c0]">
-                  {t("vehicles.subtitle")}
+                <p className="mt-1 text-sm uppercase tracking-[0.3em] text-[#000000] dark:text-[#84a0c0]">
+                  {t("roles.subtitle")}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -750,15 +700,15 @@ export function VehiclesPage() {
           </div>
 
           <HubGrid
-            title={t("vehicles.title")}
-            subtitle={t("vehicles.subtitle")}
-            columns={vehicleColumns}
-            items={vehicles}
-            renderRowCells={vehicleRowCells}
-            renderStatus={renderVehicleStatus}
-            statusColumnLabel={t("vehicles.table.status")}
-            renderActions={renderVehicleActions}
-            actionsColumnLabel={t("vehicles.table.actions")}
+            title={t("roles.title")}
+            subtitle={t("roles.subtitle")}
+            columns={roleColumns}
+            items={roles}
+            renderRowCells={roleRowCells}
+            renderStatus={renderRoleStatus}
+            statusColumnLabel={t("roles.table.status")}
+            renderActions={renderRoleActions}
+            actionsColumnLabel={t("roles.table.actions")}
             rowDensity={rowDensity}
             densityOptions={densityOptions}
             onDensityChange={setRowDensity}
@@ -767,18 +717,18 @@ export function VehiclesPage() {
             onSort={handleSort}
             statusFilter={statusFilter}
             statusFilterOptions={[
-              { value: "active", label: t("vehicles.filters.active") },
-              { value: "inactive", label: t("vehicles.filters.inactive") },
-              { value: "all", label: t("vehicles.filters.all") },
+              { value: "active", label: t("roles.filters.active") },
+              { value: "inactive", label: t("roles.filters.inactive") },
+              { value: "all", label: t("roles.filters.all") },
             ]}
             onStatusFilterChange={handleStatusFilterChange}
-            statusFilterLabel={t("vehicles.filters.statusLabel")}
+            statusFilterLabel={t("roles.filters.statusLabel")}
             searchValue={search}
             onSearchChange={handleSearchChange}
-            searchPlaceholder={t("vehicles.filters.search")}
+            searchPlaceholder={t("roles.filters.search")}
             loading={loading}
-            loadingText={t("vehicles.loading")}
-            emptyText={t("vehicles.empty")}
+            loadingText={t("roles.loading")}
+            emptyText={t("roles.empty")}
             pageCaption={pageCaption}
             page={page}
             totalPages={totalPagesFromServer}
@@ -787,13 +737,13 @@ export function VehiclesPage() {
             pageSize={pageSize}
             pageSizeOptions={PAGE_SIZE_OPTIONS}
             onPageSizeChange={handlePageSizeChange}
-            paginationPreviousLabel={t("vehicles.pagination.previous")}
-            paginationNextLabel={t("vehicles.pagination.next")}
-            paginationPageLabel={t("vehicles.pagination.page")}
-            paginationPerPageLabel={t("vehicles.pagination.perPage")}
-            selectedRowKey={selectedVehicle?.id}
-            getRowKey={(vehicle) => vehicle.id}
-            onRowClick={handleVehicleSelection}
+            paginationPreviousLabel={t("roles.pagination.previous")}
+            paginationNextLabel={t("roles.pagination.next")}
+            paginationPageLabel={t("roles.pagination.page")}
+            paginationPerPageLabel={t("roles.pagination.perPage")}
+            selectedRowKey={selectedRole?.id}
+            getRowKey={(role) => role.id}
+            onRowClick={handleRoleSelection}
           />
           {detailVisible ? (
             <div className="mt-6 flex flex-col gap-4">
@@ -801,12 +751,12 @@ export function VehiclesPage() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-semibold text-[#0f172a] dark:text-[#d6e6ee]">
-                      {selectedVehicle
-                        ? t("vehicles.form.editTitle")
-                        : t("vehicles.form.newTitle")}
+                      {selectedRole
+                        ? t("roles.form.editTitle")
+                        : t("roles.form.newTitle")}
                     </h2>
                     <p className="text-sm text-[#4f5c6a] dark:text-[#9eb1bc]">
-                      {t("vehicles.form.subtitle")}
+                      {t("roles.form.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -817,50 +767,35 @@ export function VehiclesPage() {
                 >
                   <label className="block">
                     <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#8da7b4] dark:text-[#7d9aa8]">
-                      {t("vehicles.form.plate")}
+                      {t("roles.form.name")}
                     </span>
                     <input
-                      value={formState.licensePlate}
+                      value={formState.name}
                       onChange={(event) =>
                         setFormState((current) => ({
                           ...current,
-                          licensePlate: event.target.value,
+                          name: event.target.value,
                         }))
                       }
                       className="h-11 w-full rounded-sm border border-[#c9d2e0] bg-white px-3 text-sm text-[#1f2f3f] outline-none placeholder:text-[#6b7280] focus:border-[#11b7ff] dark:border-[#000000] dark:bg-[#1f2f3e] dark:text-[#d6e6ee]"
-                      placeholder={t("vehicles.form.plate")}
+                      placeholder={t("roles.form.name")}
                     />
                   </label>
                   <label className="block">
                     <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#8da7b4] dark:text-[#7d9aa8]">
-                      {t("vehicles.form.brand")}
+                      {t("roles.form.description")}
                     </span>
-                    <input
-                      value={formState.brand}
+                    <textarea
+                      value={formState.description}
                       onChange={(event) =>
                         setFormState((current) => ({
                           ...current,
-                          brand: event.target.value,
+                          description: event.target.value,
                         }))
                       }
-                      className="h-11 w-full rounded-sm border border-[#c9d2e0] bg-white px-3 text-sm text-[#1f2f3f] outline-none placeholder:text-[#6b7280] focus:border-[#11b7ff] dark:border-[#000000] dark:bg-[#1f2f3e] dark:text-[#d6e6ee]"
-                      placeholder={t("vehicles.form.brand")}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.08em] text-[#8da7b4] dark:text-[#7d9aa8]">
-                      {t("vehicles.form.model")}
-                    </span>
-                    <input
-                      value={formState.model}
-                      onChange={(event) =>
-                        setFormState((current) => ({
-                          ...current,
-                          model: event.target.value,
-                        }))
-                      }
-                      className="h-11 w-full rounded-sm border border-[#c9d2e0] bg-white px-3 text-sm text-[#1f2f3f] outline-none placeholder:text-[#6b7280] focus:border-[#11b7ff] dark:border-[#000000] dark:bg-[#1f2f3e] dark:text-[#d6e6ee]"
-                      placeholder={t("vehicles.form.model")}
+                      rows={3}
+                      className="h-24 w-full rounded-sm border border-[#c9d2e0] bg-white px-3 py-2 text-sm text-[#1f2f3f] outline-none placeholder:text-[#6b7280] focus:border-[#11b7ff] dark:border-[#000000] dark:bg-[#1f2f3e] dark:text-[#d6e6ee]"
+                      placeholder={t("roles.form.description")}
                     />
                   </label>
                   <div className="sm:col-span-3 flex flex-wrap justify-end gap-3 pt-2">
@@ -870,14 +805,14 @@ export function VehiclesPage() {
                       disabled={submitting}
                       className="h-11 rounded-sm border border-[#d9dee2] bg-white px-5 text-sm font-semibold text-[#1f2f3f] transition-colors hover:border-[#0cbbf6] hover:text-[#0cbbf6] disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#000000] dark:bg-[#1f2f3e] dark:text-[#c4d6de] dark:hover:text-white"
                     >
-                      {t("vehicles.actions.cancel")}
+                      {t("roles.actions.cancel")}
                     </button>
                     <button
                       type="submit"
                       disabled={submitting}
                       className="h-11 rounded-sm bg-[#08aee5] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0cbbf6] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {t("vehicles.actions.save")}
+                      {t("roles.actions.save")}
                     </button>
                   </div>
                 </form>

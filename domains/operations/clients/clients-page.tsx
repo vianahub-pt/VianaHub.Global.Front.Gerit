@@ -1,19 +1,17 @@
 "use client";
 
 import clsx from "clsx";
-import {
-  SquarePen,
-  Trash2,
-  UserRoundPlus,
-  Power,
-  Loader2,
-} from "lucide-react";
+import { SquarePen, Trash2, UserRoundPlus, Power, Loader2 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/platform/auth";
 import { useTranslation } from "@/platform/i18n";
 import { WorkspaceShell } from "@/shared/layout";
 import { useToast } from "@/shared/feedback";
-import { HubGrid, type HubGridColumn, type RowDensity } from "@/shared/hub-grid";
+import {
+  HubGrid,
+  type HubGridColumn,
+  type RowDensity,
+} from "@/shared/hub-grid";
 
 interface ClientItem {
   id: number;
@@ -427,17 +425,17 @@ export function ClientsPage() {
       {
         key: "Name",
         label: t("clients.table.name"),
-        cellClassName: "font-semibold",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
         key: "Email",
         label: t("clients.table.email"),
-        cellClassName: "text-[#a4bac6]",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
       {
         key: "Phone",
         label: t("clients.table.phone"),
-        cellClassName: "text-[#a4bac6]",
+        cellClassName: "text-[#3E515B] dark:text-[#84a0c0]",
       },
     ],
     [t],
@@ -1339,11 +1337,7 @@ export function ClientsPage() {
   };
 
   const clientRowCells = useCallback(
-    (client: ClientItem) => [
-      client.name,
-      client.email ?? "-",
-      client.phone,
-    ],
+    (client: ClientItem) => [client.name, client.email ?? "-", client.phone],
     [],
   );
 
@@ -1353,8 +1347,8 @@ export function ClientsPage() {
         className={clsx(
           "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
           client.isActive
-            ? "bg-[#0f3a2e] text-[#65debb]"
-            : "bg-[#4a2c34] text-[#f6a8bb]",
+            ? "text[#3E515B] dark:text-[#84a0c0]"
+            : "text[#3E515B] dark:text-[#84a0c0]",
         )}
       >
         {client.isActive
@@ -1374,10 +1368,10 @@ export function ClientsPage() {
             event.stopPropagation();
             handleClientSelection(client);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
           title={t("clients.actions.edit")}
         >
-          <SquarePen className="h-4 w-4" />
+          <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -1385,14 +1379,14 @@ export function ClientsPage() {
             event.stopPropagation();
             void handleToggleStatus(client);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+          className="inline-flex h-8 w-8 items-center justify-center transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
           title={
             client.isActive
               ? t("clients.actions.deactivate")
               : t("clients.actions.activate")
           }
         >
-          <Power className="h-4 w-4" />
+          <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
         <button
           type="button"
@@ -1400,10 +1394,10 @@ export function ClientsPage() {
             event.stopPropagation();
             void handleDeleteClient(client);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#70404d] text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
+          className="inline-flex h-8 w-8 items-center justify-center transition-colors hover:text-[#ffd7e1]"
           title={t("clients.actions.delete")}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
         </button>
       </div>
     ),
@@ -1549,8 +1543,8 @@ export function ClientsPage() {
                       className={clsx(
                         "inline-flex rounded-full px-3 py-1 text-xs font-semibold",
                         selectedClient.isActive
-                          ? "bg-[#0f3a2e] text-[#65debb]"
-                          : "bg-[#4a2c34] text-[#f6a8bb]",
+                          ? "text-[#3E515B] dark:text-[#84a0c0]"
+                          : "text-[#3E515B] dark:text-[#84a0c0]",
                       )}
                     >
                       {selectedClient.isActive
@@ -1596,7 +1590,7 @@ export function ClientsPage() {
                       />
                     </label>
                     <label className="block">
-                      <span className="mb-1.5 block text-sm text-[#6b7280] dark:text-[#b2c5cf]">
+                      <span className="mb-1.5 block text-sm text-[#6b7280] dark:text-[#ffffff]">
                         {t("clients.form.phone")}
                       </span>
                       <input
@@ -1746,20 +1740,20 @@ export function ClientsPage() {
                     <div className="overflow-hidden rounded-sm border border-[#18303c]">
                       <table className="w-full table-fixed border-collapse">
                         <thead>
-                          <tr className="bg-[#f3f5fb] text-left text-xs uppercase tracking-[0.08em] text-[#6b7280] dark:bg-[#1f2f3e] dark:text-[#8da7b4]">
-                            <th className="px-4 py-3 font-medium">
+                          <tr className="bg-[#f3f5fb] text-left text-xs uppercase tracking-[0.08em] text-[#000000] dark:bg-[#1f2f3e] dark:text-[#8da7b4]">
+                            <th className="px-4 py-3 font-medium text-center">
                               {t("clients.contacts.table.name")}
                             </th>
-                            <th className="px-4 py-3 font-medium">
+                            <th className="px-4 py-3 font-medium text-center  ">
                               {t("clients.contacts.table.email")}
                             </th>
-                            <th className="px-4 py-3 font-medium">
+                            <th className="px-4 py-3 font-medium text-center">
                               {t("clients.contacts.table.phone")}
                             </th>
-                            <th className="px-4 py-3 font-medium">
+                            <th className="px-4 py-3 font-medium text-center">
                               {t("clients.table.status")}
                             </th>
-                            <th className="w-[10rem] px-4 py-3 font-medium">
+                            <th className="w-[10rem] px-4 py-3 font-medium text-center">
                               {t("clients.contacts.table.actions")}
                             </th>
                           </tr>
@@ -1803,8 +1797,8 @@ export function ClientsPage() {
                                     className={clsx(
                                       "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
                                       contact.isActive
-                                        ? "bg-[#0f3a2e] text-[#65debb]"
-                                        : "bg-[#4a2c34] text-[#f6a8bb]",
+                                        ? "text-[#3E515B] dark:text-[#84a0c0]"
+                                        : "text-[#3E515B] dark:text-[#84a0c0]",
                                     )}
                                   >
                                     {contact.isActive
@@ -1817,34 +1811,34 @@ export function ClientsPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleContactEdit(contact)}
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+                                      className="inline-flex h-8 w-8 items-center justify-center transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#84a0c0] dark:hover:text-white"
                                       title={t("clients.actions.edit")}
                                     >
-                                      <SquarePen className="h-4 w-4" />
+                                      <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() =>
                                         void handleContactToggleStatus(contact)
                                       }
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+                                      className="inline-flex h-8 w-8 items-center justify-center transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#84a0c0] dark:hover:text-white"
                                       title={
                                         contact.isActive
                                           ? t("clients.actions.deactivate")
                                           : t("clients.actions.activate")
                                       }
                                     >
-                                      <Power className="h-4 w-4" />
+                                      <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() =>
                                         void handleContactDelete(contact)
                                       }
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#70404d] text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
+                                      className="inline-flex h-8 w-8 items-center justify-center transition-colors hover:text-[#ffd7e1]"
                                       title={t("clients.actions.delete")}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                   </div>
                                 </td>
@@ -2071,8 +2065,8 @@ export function ClientsPage() {
                                     className={clsx(
                                       "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
                                       address.isActive
-                                        ? "bg-[#0f3a2e] text-[#65debb]"
-                                        : "bg-[#4a2c34] text-[#f6a8bb]",
+                                        ? "text-[#3E515B] dark:text-[#84a0c0]"
+                                        : "text-[#3E515B] dark:text-[#84a0c0]",
                                     )}
                                   >
                                     {address.isActive
@@ -2085,34 +2079,34 @@ export function ClientsPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleAddressEdit(address)}
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+                                      className="inline-flex h-8 w-8 items-center justify-center text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
                                       title={t("clients.actions.edit")}
                                     >
-                                      <SquarePen className="h-4 w-4" />
+                                      <SquarePen className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() =>
                                         void handleAddressToggleStatus(address)
                                       }
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#d1d9e5] text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
+                                      className="inline-flex h-8 w-8 items-center justify-center text-[#1f2f3f] transition-colors hover:text-[#0cbbf6] dark:border-[#38505d] dark:text-[#9eb1bc] dark:hover:text-white"
                                       title={
                                         address.isActive
                                           ? t("clients.actions.deactivate")
                                           : t("clients.actions.activate")
                                       }
                                     >
-                                      <Power className="h-4 w-4" />
+                                      <Power className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() =>
                                         void handleAddressDelete(address)
                                       }
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-[#70404d] text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
+                                      className="inline-flex h-8 w-8 items-center justify-center text-[#e7a9b8] transition-colors hover:text-[#ffd7e1]"
                                       title={t("clients.actions.delete")}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash2 className="h-4 w-4 text-[#3E515B] dark:text-[#84a0c0]" />
                                     </button>
                                   </div>
                                 </td>
