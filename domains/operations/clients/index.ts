@@ -3,4 +3,5 @@ export const operationsClientsModule = {
   resource: "clients",
 } as const;
 
+export * from "@/domains/operations/clients/clients-details";
 export * from "@/domains/operations/clients/clients-page";
